@@ -1,8 +1,18 @@
 import { dataCourses } from './dataCourses.js';
-var coursesTbody = document.getElementById('courses'); // Nodo tbody que tiene el id="courses"
+import { dataDatos } from './dataDatos.js';
+var datosTbody = document.getElementById('datos');
+var coursesTbody = document.getElementById('courses');
 var btnfilterByName = document.getElementById("button-filterByName");
+var btnfilterByCredits = document.getElementById("button-filterByCredits");
+var inputLimInf = document.getElementById("liminf");
+var inputLimSup = document.getElementById("limsup");
 var inputSearchBox = document.getElementById("search-box");
 var totalCreditElm = document.getElementById("total-credits");
+renderCoursesInTable(dataCourses);
+renderDatosInTable(dataDatos);
+totalCreditElm.innerHTML = "" + getTotalCredits(dataCourses);
+btnfilterByName.onclick = function () { return applyFilterByName(); };
+btnfilterByCredits.onclick = function () { return applyFilterByCredits(); };
 function renderCoursesInTable(courses) {
     courses.forEach(function (c) {
         var trElement = document.createElement("tr");
@@ -10,9 +20,13 @@ function renderCoursesInTable(courses) {
         coursesTbody.appendChild(trElement);
     });
 }
-btnfilterByName.onclick = function () { return applyFilterByName(); };
-renderCoursesInTable(dataCourses);
-totalCreditElm.innerHTML = "" + getTotalCredits(dataCourses);
+function renderDatosInTable(datos) {
+    datos.forEach(function (x) {
+        var trElement = document.createElement("tr");
+        trElement.innerHTML = "<td>" + x.titulo + "</td>\n                         <td>" + x.info + "</td>";
+        datosTbody.appendChild(trElement);
+    });
+}
 function getTotalCredits(courses) {
     var totalCredits = 0;
     courses.forEach(function (course) {
@@ -27,10 +41,24 @@ function applyFilterByName() {
     var coursesFiltered = searchCourseByName(text, dataCourses);
     renderCoursesInTable(coursesFiltered);
 }
+function applyFilterByCredits() {
+    var limInf = inputLimInf.value;
+    var limSup = inputLimSup.value;
+    limInf = (limInf == null) ? '0' : limInf;
+    limSup = (limSup == null) ? '10' : limSup;
+    var inferior = parseInt(limInf);
+    var superior = parseInt(limSup);
+    clearCoursesInTable();
+    var coursesFiltered = searchCourseByCredits(inferior, superior, dataCourses);
+    renderCoursesInTable(coursesFiltered);
+}
 function searchCourseByName(nameKey, courses) {
     return nameKey === '' ? dataCourses : courses.filter(function (c) {
         return c.name.match(nameKey);
     });
+}
+function searchCourseByCredits(limInf, limSup, courses) {
+    return courses.filter(function (c) { return c.credits > limInf && c.credits < limSup; });
 }
 function clearCoursesInTable() {
     while (coursesTbody.hasChildNodes()) {
